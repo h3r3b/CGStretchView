@@ -13,6 +13,7 @@
     UIRotationGestureRecognizer *mainRotation;
     UIPinchGestureRecognizer *mainPinch;
     UITapGestureRecognizer *mainTap;
+    UITapGestureRecognizer *doubleTap;
     CGFloat prevRotation;
     CGFloat prevPinchScale;
     UIView *borderView;
@@ -25,7 +26,7 @@
         
         //Set default property values
         self.clipsToBounds = NO;
-        self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = YES;
         
         borderView = [[UIView alloc] initWithFrame:self.bounds];
@@ -105,6 +106,14 @@
     mainTap.enabled = _tappingEnabled;
     [self addGestureRecognizer:mainTap];
     
+    doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mainViewDoubleTapped:)];
+    doubleTap.numberOfTapsRequired = 2;
+    doubleTap.delegate = self;
+    doubleTap.enabled = _tappingEnabled;
+    [self addGestureRecognizer:doubleTap];
+    
+    [mainTap requireGestureRecognizerToFail:doubleTap];
+    
 }
 
 - (void)setDefaultGestureProperties:(UIPanGestureRecognizer*)recognizer {
@@ -139,6 +148,16 @@
         if ([_delegate respondsToSelector:@selector(stretchViewTapped:)])
             [_delegate stretchViewTapped:self];
     }
+}
+
+- (void)mainViewDoubleTapped:(UITapGestureRecognizer*)tap {
+    [self rotateMainViewBy45:tap];
+}
+
+- (void)rotateMainViewBy45:(UITapGestureRecognizer*)tap
+{
+    CGFloat rotation = 0.785398163; //45 degrees in radians
+    [tap.view setTransform:CGAffineTransformRotate(self.transform, rotation)];
 }
 
 - (void)setPanningEnabled:(BOOL)panningEnabled {
